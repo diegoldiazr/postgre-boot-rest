@@ -27,7 +27,8 @@ public class Response<T> {
 		response.put("hasNextPage", pageTuts.hasNext());
 		response.put("totalItems", pageTuts.getTotalElements());
 		response.put("totalPages", pageTuts.getTotalPages());
-		response.put("sort", pageTuts.getSort());
+		response.put("sizePage", pageTuts.getSize());
+		//response.put("sort", pageTuts.getSort());
 		
 		
 		

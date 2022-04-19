@@ -34,26 +34,32 @@ public class TutorialController {
 	TutorialRepository tutorialRepository;
 
 	@GetMapping("/tutorials")
-	public ResponseEntity<Map<String, Object>> getAllTutorials
-		(@RequestParam(required = false) String title,
-		@RequestParam(defaultValue = "0") int page, 
-		@RequestParam(defaultValue = "3") int size,
-		@RequestParam(defaultValue = "id,asc") String[] sort) {
+	public ResponseEntity<Map<String, Object>> getAllTutorials(@RequestParam(required = false) String title,
+			@RequestParam(required = false) String description, 
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "id,asc") String[] sort) {
 		try {
-			
+
 			Orders order = new Orders(sort);
 			Pageable paging = PageRequest.of(page, size, Sort.by(order.getOrders()));
-			
 
 			Page<Tutorial> pageTuts;
-			if (title == null)
-				pageTuts = tutorialRepository.findAll(paging);
-			else {
-				pageTuts = tutorialRepository.findByTitleContaining(title, paging);
+
+			if ((title != null) && (description != null)) {
+				pageTuts = tutorialRepository.findByTitleAndDescriptionContaining(title, description, paging);
+			} else {
+				if ((title == null) && (description == null)) {
+					pageTuts = tutorialRepository.findAll(paging);
+				} else {
+					if (title != null)
+						pageTuts = tutorialRepository.findByTitleContaining(title, paging);
+					else
+						pageTuts = tutorialRepository.findByDescriptionContaining(description, paging);
+				}
 			}
-				
+
 			Response<Tutorial> response = new Response<Tutorial>(pageTuts);
-			
+
 			return new ResponseEntity<>(response.getResponse(), HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -117,10 +123,10 @@ public class TutorialController {
 
 	@GetMapping("/tutorials/published")
 	public ResponseEntity<Map<String, Object>> findByPublished(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "3") int size) {
+			@RequestParam(defaultValue = "5") int size) {
 		try {
 			Pageable paging = PageRequest.of(page, size);
-			Page<Tutorial> pageTuts = tutorialRepository.findByPublished(true, paging);			
+			Page<Tutorial> pageTuts = tutorialRepository.findByPublished(true, paging);
 			Response<Tutorial> response = new Response<Tutorial>(pageTuts);
 			return new ResponseEntity<>(response.getResponse(), HttpStatus.OK);
 		} catch (Exception e) {
