@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ddr.adapter.Orders;
 import com.ddr.adapter.Response;
 import com.ddr.model.Tutorial;
 import com.ddr.repository.TutorialRepository;
@@ -32,17 +34,24 @@ public class TutorialController {
 	TutorialRepository tutorialRepository;
 
 	@GetMapping("/tutorials")
-	public ResponseEntity<Map<String, Object>> getAllTutorials(@RequestParam(required = false) String title,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
+	public ResponseEntity<Map<String, Object>> getAllTutorials
+		(@RequestParam(required = false) String title,
+		@RequestParam(defaultValue = "0") int page, 
+		@RequestParam(defaultValue = "3") int size,
+		@RequestParam(defaultValue = "id,asc") String[] sort) {
 		try {
 			
-			Pageable paging = PageRequest.of(page, size);
+			Orders order = new Orders(sort);
+			Pageable paging = PageRequest.of(page, size, Sort.by(order.getOrders()));
+			
 
 			Page<Tutorial> pageTuts;
 			if (title == null)
 				pageTuts = tutorialRepository.findAll(paging);
-			else
+			else {
 				pageTuts = tutorialRepository.findByTitleContaining(title, paging);
+			}
+				
 			Response<Tutorial> response = new Response<Tutorial>(pageTuts);
 			
 			return new ResponseEntity<>(response.getResponse(), HttpStatus.OK);
