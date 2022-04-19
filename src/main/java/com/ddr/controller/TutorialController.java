@@ -1,8 +1,5 @@
 package com.ddr.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ddr.adapter.Response;
 import com.ddr.model.Tutorial;
 import com.ddr.repository.TutorialRepository;
 
@@ -37,7 +35,7 @@ public class TutorialController {
 	public ResponseEntity<Map<String, Object>> getAllTutorials(@RequestParam(required = false) String title,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
 		try {
-			List<Tutorial> tutorials = new ArrayList<Tutorial>();
+			
 			Pageable paging = PageRequest.of(page, size);
 
 			Page<Tutorial> pageTuts;
@@ -45,13 +43,9 @@ public class TutorialController {
 				pageTuts = tutorialRepository.findAll(paging);
 			else
 				pageTuts = tutorialRepository.findByTitleContaining(title, paging);
-			tutorials = pageTuts.getContent();
-			Map<String, Object> response = new HashMap<>();
-			response.put("tutorials", tutorials);
-			response.put("currentPage", pageTuts.getNumber());
-			response.put("totalItems", pageTuts.getTotalElements());
-			response.put("totalPages", pageTuts.getTotalPages()-1);
-			return new ResponseEntity<>(response, HttpStatus.OK);
+			Response<Tutorial> response = new Response<Tutorial>(pageTuts);
+			
+			return new ResponseEntity<>(response.getResponse(), HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -116,19 +110,10 @@ public class TutorialController {
 	public ResponseEntity<Map<String, Object>> findByPublished(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "3") int size) {
 		try {
-			List<Tutorial> tutorials = new ArrayList<Tutorial>();
 			Pageable paging = PageRequest.of(page, size);
-
-			Page<Tutorial> pageTuts = tutorialRepository.findByPublished(true, paging);
-			tutorials = pageTuts.getContent();
-
-			Map<String, Object> response = new HashMap<>();
-			response.put("tutorials", tutorials);
-			response.put("currentPage", pageTuts.getNumber());
-			response.put("totalItems", pageTuts.getTotalElements());
-			response.put("totalPages", pageTuts.getTotalPages()-1);
-
-			return new ResponseEntity<>(response, HttpStatus.OK);
+			Page<Tutorial> pageTuts = tutorialRepository.findByPublished(true, paging);			
+			Response<Tutorial> response = new Response<Tutorial>(pageTuts);
+			return new ResponseEntity<>(response.getResponse(), HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
