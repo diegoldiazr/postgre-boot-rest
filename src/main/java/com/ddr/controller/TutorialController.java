@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ddr.adapter.Orders;
 import com.ddr.adapter.Response;
+import com.ddr.exception.ResourceNotFoundException;
 import com.ddr.model.Tutorial;
 import com.ddr.repository.TutorialRepository;
 
@@ -38,7 +39,7 @@ public class TutorialController {
 			@RequestParam(required = false) String description, 
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "id,asc") String[] sort) {
-		try {
+
 
 			Orders order = new Orders(sort);
 			Pageable paging = PageRequest.of(page, size, Sort.by(order.getOrders()));
@@ -61,19 +62,14 @@ public class TutorialController {
 			Response<Tutorial> response = new Response<Tutorial>(pageTuts);
 
 			return new ResponseEntity<>(response.getResponse(), HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
 	}
 
 	@GetMapping("/tutorials/{id}")
 	public ResponseEntity<Tutorial> getTutorialById(@PathVariable("id") long id) {
-		Optional<Tutorial> tutorialData = tutorialRepository.findById(id);
-		if (tutorialData.isPresent()) {
-			return new ResponseEntity<>(tutorialData.get(), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		Tutorial tutorial = tutorialRepository.findById(id)
+		        .orElseThrow(() -> new ResourceNotFoundException("Not found Tutorial with id = " + id));
+		    return new ResponseEntity<>(tutorial, HttpStatus.OK);
 	}
 
 	@PostMapping("/tutorials")
