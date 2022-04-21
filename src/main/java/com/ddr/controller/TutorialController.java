@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ddr.adapter.Orders;
-import com.ddr.adapter.Response;
 import com.ddr.exception.ResourceNotFoundException;
 import com.ddr.model.Tutorial;
+import com.ddr.payload.response.Response;
 import com.ddr.repository.TutorialRepository;
 
 @CrossOrigin(origins = "http://localhost:8081")

@@ -1,4 +1,4 @@
-package com.ddr.adapter;
+package com.ddr.payload.response;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
